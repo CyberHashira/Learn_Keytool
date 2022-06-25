@@ -1,0 +1,70 @@
+Learn Keytool Part 2
+----------------------
+
+# Generate keypair, use default keystore type and default keystore filename and location.
+keytool -genkey 
+
+
+# List content of a default keystore
+keytool -list
+
+
+# Display verbose output
+keytool -list -v
+
+
+# Display output in RFC format
+keytool -list -rfc
+
+
+# Generate keypair with an alias
+keytool -genkey -alias TestingKey
+
+
+# Generate keypair with some additional details.
+keytool -genkey -alias Apple -keyalg RSA -keysize 2048 -validity 365 -sigalg sha256WithRSA -dname "CN=Apple"
+
+
+# Generate keypair inside a user define keystore
+keytool -genkey -alias mySigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -keystore myStore.ks -dname "CN=mySigningKey"
+
+
+# Generate an AES key using JKS keystore (Should fail)
+keytool -genseckey -alias myAesKey -keyalg AES -keysize 256 -keystore myStore.ks
+
+
+# Generate an AES key using JCEKS
+keytool -genseckey -alias myAesKey -keyalg AES -keysize 256 -keystore myStore.jce -storetype jceks
+
+
+# Generate a DES-3 key using JCEKS
+keytool -genseckey -alias myDesKey -keyalg DESede -keystore myStore.jce -storetype jceks
+
+
+# List jceks keystore
+keytool -list -keystore myStore.jceks -storetype jceks
+
+
+# Generate ECDSA key using JCEKS
+keytool -genkey -alias myECKey2 -keyalg EC -groupname secp384r1 -sigalg sha256WithECDSA -validity 730 -keystore myStore.jce -storetype jceks -dname "CN=myECKey"
+
+
+# Get a list of ECDSA curves
+openssl ecparam -list_curves
+
+
+# Generate RSA key inside a PKCS12 keystore
+keytool -genkey -alias mySigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -keystore myStore.p12 -storetype PKCS12 -dname "CN=mySigningKey"
+
+
+# Generate AES key inside PKCS12 keystore
+keytool -genseckey -alias myAesKey -keyalg AES -keysize 256 -keystore myStore.p12 -storetype pkcs12
+
+
+# Generate ECDSA keypair inside PKCS12 keystore
+keytool -genkey -alias myECKey2 -keyalg EC -groupname secp384r1 -sigalg sha256WithECDSA -validity 730 -keystore myStore.p12 -storetype pkcs12 -dname "CN=myECKey"
+
+
+# Display content of a PKCS12 keystore
+keytool -list -keystore myStore.p12 -storetype PKCS12
+

@@ -1,0 +1,21 @@
+Learn Keytool Part 1
+----------------------
+
+# Displays content of a JKS type keystore
+keytool -list -keystore myStore.jks
+
+
+# Wrong way to display content of a jceks keystore
+keytool -list -keystore myStore.jceks (should throw an error)
+
+
+# Correct way to display content of a jceks keystore
+keytool -list -keystore myStore.jceks -storetype jceks
+
+
+# Display content of a pkcs12 keystore
+keytool -list -keystore myStore.p12 -storetype pkcs12
+
+
+# Display contents of a PKCS11 keystore a.k.a SunPKCS11
+keytool -list -keystore NONE -storetype PKCS11 -providerclass sun.security.pkcs11.SunPKCS11 -providerarg p11.cfg
