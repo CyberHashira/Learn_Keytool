@@ -1,0 +1,59 @@
+Setup LunaProvider on Linux
+=============================
+
+
+
+Static method
+---------------
+
+
+Step 1 ) Copy LunaProvider.jar in JAVA_HOME/jre/lib/ext
+Step 2 ) Create a symlink of libLunaAPI.so in /usr/lib
+Step 3 ) Add com.safenetinc.luna.provider.LunaProvider in java.security
+Step 4 ) Create a keystore file with "slot:SLOT_LABEL" or "tokenlabel:SLOT_LABEL"
+
+Test using keytool -list -keystore <KeyStore_Name> -storetype Luna
+
+
+
+Dynamic Method
+---------------
+
+> Create a keystore file with "slot:SLOT_NUMBER" or "tokenlabel:SLOT_LABEL" as it's content
+
+# To list contents
+keytool -list -keystore <KeyStore_Name> -storetype Luna -providerclass com.safenetinc.luna.provider.LunaProvider -providerpath /usr/safenet/lunaclient/jsp/lib/LunaProvider.jar -J-Djava.library.path=/usr/safenet/lunaclient/jsp/lib
+
+
+# To generate RSA key
+keytool -genkey -alias mySigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore <KeyStore_name> -storetype Luna -providerclass com.safenetinc.luna.provider.LunaProvider -providerpath /usr/safenet/lunaclient/jsp/lib/LunaProvider.jar -J-Djava.library.path=/usr/safenet/lunaclient/jsp/lib
+
+
+
+
+
+
+Setup LunaProvider on Windows
+================================
+
+
+Dynamic method
+----------------
+
+keytool -list -keystore <KeyStore_File> -storetype Luna -providerclass com.safenetinc.luna.provider.LunaProvider -providerpath C:\Program Files\SafeNet\LunaClient\jsp\lib\LunaProvider.jar -J-Djava.library.path=C:\Program Files\SafeNet\LunaClient\jsp\lib
+
+
+
+
+Static Method
+--------------
+
+1. Copy LunaProvider.jar into %JAVA_HOME%\jre\lib\ext
+2. Copy LunaAPI.dll in C:\Windows\System32 or add C:\Program Files\SafeNet\LunaClient\jsp\lib into path environment variable
+3. Add com.safenetinc.luna.provider.LunaProvider in java.security.
+4. Create a keystore file with "slot:SLOT_NUMBER" or "tokenlabel:SLOT_LABEL" as it's content
+
+Test using :-
+keytool -list -keystore KeyStore_File -storetype Luna
+
+
