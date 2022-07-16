@@ -1,0 +1,45 @@
+
+# Generate a Private with a self-signed certificate for code signing
+keytool -genkey -alias code_signing -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype pkcs12 -storepass env:kpwd -dname "CN=CodeSigning" -ext KU="digitalSignature" -ext EKU="codeSigning"
+
+
+# List contents of my newly created keystore. 
+keytool -list -keystore myStore.p12 -storetype pkcs12 -storepass env:kpwd -v
+
+
+# Generate a certificate request.
+keytool -certreq -keystore myStore.p12 -storetype pkcs12 -storepass env:kpwd -alias code_signing -sigalg sha256WithRSA -file codesigning.csr
+
+
+# bring the csr I generated on the machine with has an OpenSSL based CA
+scp spaul@akaza:keyStores/code_signing.csr .
+
+
+# Now I'll sign this csr using OpenSSL. 
+openssl ca -config myCA/myIssuing/myIssuing.cnf -extensions code_signing -days 730 -notext -md sha256 -in code_signing.csr -out code_signing.cer
+
+
+# I'll pass the signed certificate back to the machine which has my keystore.
+scp code_signing.cer spaul@akaza:keyStores/
+
+
+# Command to generate a p7b file.
+openssl crl2pkcs7 -nocrl -certfile myRoot.cer -certfile myIssuing.cer -certfile code_signing.cer -out code_signing.p7b
+
+
+# Import p7b file to my keystore.
+keytool -importcert -keystore myStore.p12 -storetype pkcs12 -storepass env:kpwd -alias code_signing -file code_signing.p7b
+
+
+
+# Second method is to import root certificate followed by issuing and issued certificate
+keytool -importcert -alias myIssuing -keystore myStore.p12 -storetype pkcs12 -storepass env:kpwd -file myIssuing.cer
+keytool -importcert -alias myRoot -keystore myStore.p12 -storetype pkcs12 -storepass env:kpwd -file myRoot.cer
+keytool -importcert -keystore myStore.p12 -storetype pkcs12 -storepass env:kpwd -alias code_signing -file code_signing.cer
+ 
+ 
+
+# Third method is the add root certificate and issuing certificate into cacerts (TrustStore of Java) and then import the signed certificate into keystore.
+sudo keytool -importcert -alias myRoot -keystore /opt/java/jdk1.8.0_333/jre/lib/security/cacerts -file myRoot.cer
+sudo keytool -importcert -alias myIssuing -keystore /opt/java/jdk1.8.0_333/jre/lib/security/cacerts -file myIssuing.cer
+keytool -importcert -keystore myStore.p12 -storetype pkcs12 -storepass env:kpwd -alias code_signing -file code_signing.cer -trustcacerts
