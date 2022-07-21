@@ -1,0 +1,77 @@
+JARSIGNER
+------------
+
+
+What are Jar files?
+--------------------
+JAR is a short form for Java Archive. JAR used zip format to package all java class files.
+
+
+
+How to create a jarfile ?
+--------------------------
+
+# creating jar from a single file
+jar -cf test.jar test.txt
+
+# Creating jar from multiple files.
+for n in {1..10}; do echo "Hello" > file$n; done
+jar -cf test.jar file*
+
+# Extract a jar file
+jar -xf test.jar
+
+
+
+Verifying jar files
+---------------------
+
+# Check if a jar file is signed or not.
+jarsigner -verify ../Softwares/BouncyCastle/bcprov-ext-jdk18on-171.jar
+
+# Check if a jar file is signed or not with verbose output
+jarsigner -verify ../Softwares/BouncyCastle/bcprov-ext-jdk18on-171.jar -verbose
+
+# Check if a jar file is signed or not with verbose output and certificates used.
+jarsigner -verify ../Softwares/BouncyCastle/bcprov-ext-jdk18on-171.jar -verbose -certs
+jarsigner -verify ../Softwares/BouncyCastle/bcprov-ext-jdk18on-171.jar -verbose:summary -certs
+
+
+Create a keystore with youy signing keys.
+-------------------------------------------
+
+# Create a keystore with your signing keys in it.
+keytool -genkey -alias signingKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 365 -keystore myStore.p12 -storetype pkcs12 -dname "CN=SigningKey,O=Home,OU=HomePKI,Email=pki@home.lab" -ext KU:C="digitalSignature" -ext EKU:C="codeSigning" -ext BC:C="ca:false"
+
+# Preferably get it signed by a CA.
+keytool -certreq -alias signingkey -keystore myStore.p12 -storetype pkcs12 -file signingKey.csr
+
+# Generate a P7B file after getting the signed certificates.
+openssl crl2pkcs7 -nocrl -certfile cacerts.cer -certfile signingKey.cer -out signingKey.p7b
+
+# Import signed certificate into your keystore.
+keytool -importcert -file signingKey.p7b -keystore myStore.p12 -storetype pkcs12 -alias signingKey
+
+
+Signing a jar file
+---------------------
+
+# Signing a jar file
+jarsigner -keystore myStore.p12 -storetype pkcs12 SolarSystem.jar signingKey
+
+# Create a separate signed jar file.
+jarsigner -keystore myStore.p12 -storetype pkcs12 -signedjar SolarSystem_signed.jar SolarSystem.jar signingKey
+
+# Signing with TSA
+jarsigner -keystore myStore.p12 -storetype pkcs12 -signedjar SolarSystem_signed.jar -tsa http://timestamp.globalsign.com/tsa/r6advanced1 SolarSystem.jar signingKey
+
+# Gives warning about signer certificate
+jarsigner -verify SolarSystem_signed.jar
+
+# Only gives warning about TSA
+jarsigner -verify SolarSystem_signed.jar -keystore truststore
+
+
+Links :-
+Timestamping authorities
+https://gist.github.com/Manouchehri/fd754e402d98430243455713efada710
