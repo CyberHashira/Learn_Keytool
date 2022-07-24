@@ -1,0 +1,85 @@
+Jarsigning using Luna Cloud HSM
+---------------------------------
+
+
+
+using SunPKCS11
+-----------------
+
+# Generate your signing keys.
+keytool -genkey -alias signingKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -dname "CN=Code Signing" -ext KU:C="digitalSignature" -ext EKU:C="codeSigning" -keystore NONE -storetype PKCS11 -providername SunPKCS11-CloudHSM -providerclass sun.security.pkcs11.SunPKCS11 -providerarg p11.cfg
+
+
+# Generate certificate request
+keytool -certreq -alias signingKey -keystore NONE -storetype pkcs11 -providername SunPKCS11-CloudHSM -providerclass sun.security.pkcs11.SunPKCS11 -providerarg p11.cfg -file signingKey.csr
+ 
+
+# Signing CSR using my OpenSSL CA
+openssl ca -config myCA/myIssuing/myIssuing.cnf -extensions code_signing -days 730 -md sha256 -in signingKey.csr -out signingKey.cer
+
+
+# Create a p7b file
+openssl crl2pkcs7 -nocrl -certfile myRoot.cer -certfile myIssuing.cer -certfile signingKey.cer -out signingKey.p7b
+
+
+# Import P7B to keystore
+keytool -importcert -alias signingKey -keystore NONE -storetype PKCS11 -providername SunPKCS11-CloudHSM -providerclass sun.security.pkcs11.SunPKCS11 -providerarg p11.cfg -file signingKey.p7b
+
+
+# List keystore
+keytool -list -keystore NONE -storetype PKCS11 -providerclass sun.security.pkcs11.SunPKCS11 -providerarg p11.cfg -v
+
+
+# Check if the jar you want to sign is signed or unsigned.
+jarsigner -verify SolarSystem.jar
+
+
+# Sign the jar file if it's unsigned.
+jarsigner -keystore NONE -storetype PKCS11 -providername SunPKCS11-CloudHSM -providerclass sun.security.pkcs11.SunPKCS11 -providerarg p11.cfg -signedjar SS_p11.jar -tsa http://timestamp.globalsign.com/tsa/r6advanced1 SolarSystem.jar signingKey
+
+
+# Verifying my signed jar file
+jarsigner -verify SS_p11.jar -keystore truststore -verbose
+
+
+
+
+
+Using LunaProvider (Java Security Provider for Luna HSMs)
+----------------------------------------------------------
+
+
+# Create a keystore for LunaProvider
+echo "slot:0" > luna.ks
+
+
+# Generate signing key using LunaProvider
+keytool -genkey -alias mySigningKey -keyalg RSA -keysize 2048 -validity 730 -sigalg sha256WithRSA -dname "CN=Jar Signing" -ext KU:C="digitalSignature" -ext EKU:C="codeSigning" -keystore luna.ks -storetype Luna
+
+
+# Generate CSR
+keytool -certreq -alias mySigningKey -keystore luna.ks -storetype Luna -file signingKey.csr
+
+
+# Get the CSR signed.
+openssl ca -config myCA/myIssuing/myIssuing.cnf -extensions code_signing -days 730 -notext -md sha256 -in signingKey.csr -out signingKey.cer
+
+
+# Create a P7B file.
+openssl crl2pkcs7 -nocrl -certfile myRoot.cer -certfile myIssuing.cer -certfile signingKey.cer -out signingKey.p7b
+
+
+# Import signed certificate.
+ keytool -importcert -keystore luna.ks -storetype Luna -alias mySigningKey -file signingKey.p7b
+ 
+
+
+# Sign the jar file
+jarsigner -keystore luna.ks -storetype Luna -signedjar SS.jar -tsa http://timestamp.globalsign.com/tsa/r6advanced1 SolarSystem.jar mySigningKey
+
+// Use this command if you want to load your LunaProvider dynamically.
+#jarsigner -keystore luna.ks -storetype Luna -providername LunaProvider -providerclass com.safenetinc.luna.provider.LunaProvider -J-cp -J/usr/safenet/lunaclient/jsp/lib/LunaProvider.jar:/opt/java/jdk1.8.0_333/lib/tools.jar -J-Djava.library.path=/usr/safenet/lunaclient/jsp/lib/ -signedjar SS.jar -tsa http://timestamp.globalsign.com/tsa/r6advanced1 SolarSystem.jar mySigningKey
+
+# Verify the signed jar
+jarsigner -verify SS.jar -keystore truststore -verbose
+
