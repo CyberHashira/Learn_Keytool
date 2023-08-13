@@ -1,0 +1,82 @@
+Generating Certificates using Keytool
+----------------------------------------
+
+keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -keystore myStore.p12 -storetype PKCS12 -validity 730 -sigalg sha256WithRSA -dname "CN=Testing" -storepass env:KPWD
+
+keytool -list -keystore myStore.p12 -storetype pkcs12 -storepass env:KPWD -v
+
+
+
+
+Setting KeyUsage
+-------------------
+
+Critical KeyUsage
+> keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing" -ext KU:C="digitalSignature"
+
+Multiple KeyUsage
+> keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing" -ext KU:C="digitalSignature,dataEncipherment"
+
+Setting Non-Critical KeyUsage
+> keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing" -ext KU="digitalSignature,dataEncipherment"
+
+Using short forms for Key Usage
+> keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing" -ext KU="dS,dataE"
+
+> keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing,O=Acme Inc.,OU=PKI" -ext KU:critical="dS,crlS,encipherO,decipherO,kA,keyCertS,nR"
+
+
+
+
+Setting Extended KeyUsage
+--------------------------
+keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing,O=Acme Inc.,OU=PKI" -ext KU:critical="dS,nR" -ext EKU:C="codeSigning"
+
+keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing,O=Acme Inc.,OU=PKI" -ext KU:critical="digitalSignature,keyCertSign,crlSign," -ext EKU="serverAuth,clientAuth"
+
+
+
+
+Setting Basic Constraints
+---------------------------
+
+keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing,O=Acme Inc.,OU=PKI" -ext KU:critical="digitalSignature,keyCertSign,crlSign," -ext EKU="serverAuth,clientAuth" -ext BC="ca:true,pathlen:0"
+
+keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing,O=Acme Inc.,OU=PKI" -ext KU:critical="dS,nR" -ext EKU:C="codeSigning" -ext BC="ca:false,pathlen:0"
+
+
+
+
+Setting Subject Alternate Names
+---------------------------------
+
+keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing,O=Acme Inc.,OU=PKI" -ext SAN="DNS:cyberhashira.com"
+
+keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing,O=Acme Inc.,OU=PKI" -ext SAN="DNS:cyberhashira.com,IP:127.0.0.1"
+
+keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing,O=Acme Inc.,OU=PKI" -ext SAN="DNS:cyberhashira.com,IP:127.0.0.1,EMAIL:web-admin@cyberhashira.com"
+
+
+
+
+Setting CDP
+------------
+
+Single CDP 
+> keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing,O=Acme Inc.,OU=PKI" -ext crl="uri:http://127.0.0.1/test.crl"
+
+Multiple CDP
+> keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing,O=Acme Inc.,OU=PKI" -ext crl="uri:http://127.0.0.1/test.crl,uri:ftp://127.0.0.1/test.crl,uri:ldap://127.0.0.1/test.crl"
+
+
+
+
+Setting Authority Information Access
+--------------------------------------
+
+Setting issuer cert path
+> keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing,O=Acme Inc.,OU=PKI" -ext AIA="caIssuers:uri:http://cyberhashira.com/issuer.cer"
+
+
+Setting OCSP path
+> keytool -genkey -alias testSigningKey -keyalg RSA -keysize 2048 -sigalg sha256WithRSA -validity 730 -keystore myStore.p12 -storetype PKCS12 -storepass env:KPWD -dname "CN=Testing,O=Acme Inc.,OU=PKI" -ext KU:critical="dS,nR" -ext EKU:C="codeSigning" -ext BC="ca:false,pathlen:0" -ext SAN="DNS:cyberhashira.com,IP:127.0.0.1,EMAIL:web-admin@cyberhashira.com" -ext crl="uri:http://127.0.0.1/test.crl,uri:ftp://127.0.0.1/test.crl,uri:ldap://127.0.0.1/test.crl" -ext AIA="caIssuers:uri:http://cyberhashira.com/issuer.cer,ocsp:uri:http://ocsp.cyberhashira.com"

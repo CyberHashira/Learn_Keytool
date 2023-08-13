@@ -1,21 +1,39 @@
 Learn Keytool Part 1
 ----------------------
 
-# Displays content of a JKS type keystore
+# Display contents of a JKS type keystore
 keytool -list -keystore myStore.jks
 
+** Default keystore type for Java 8 is JKS (Java KeyStore). Therefore, mentioning keystore type as JKS is not necessary **
+ 
 
-# Wrong way to display content of a jceks keystore
+
+
+# Wrong way to display contents of a jceks keystore
 keytool -list -keystore myStore.jceks (should throw an error)
+
+** Default keystore type for Java 8 is JKS. if you're trying to read a JCEKS keystore then you must specify the keystore type as JCEKS. **
+
+
 
 
 # Correct way to display content of a jceks keystore
 keytool -list -keystore myStore.jceks -storetype jceks
 
+** If you need to read a non-JKS keystore then you need to specify the keystore type of that keystore. **
+
+
+
 
 # Display content of a pkcs12 keystore
 keytool -list -keystore myStore.p12 -storetype pkcs12
 
+** Please note that by default, Java version 11 and above has default keystore type set has PKCS12. If you're using Java 11 or newer then you don't need to 
+specify pkcs12 as the keystore type. **
+
+
+
 
 # Display contents of a PKCS11 keystore a.k.a SunPKCS11
 keytool -list -keystore NONE -storetype PKCS11 -providerclass sun.security.pkcs11.SunPKCS11 -providerarg p11.cfg
+** Example shows how to access a PKCS#11 type keystore. For e.g., SunPKCS11 and IBMPKCS11.

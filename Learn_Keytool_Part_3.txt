@@ -1,38 +1,54 @@
 Learn Keytool Part 3
 ----------------------
 
-# Display contents of a JKS keystore and authenticate using a file containing keystore password
+# Display contents of a JKS keystore and authenticate using a file containing keystore password. 'pass' is the name of the file which contains the keystore 
+password.
 keytool -list -keystore myStore.jks -storepass:file pass
+
+
 
 
 # Display contents of a JCEKS keystore and authenticate using a file containing keystore password
 keytool -list -keystore myStore.jceks -storetype jceks -storepass:file pass
 
 
+
+
 # Display contents of a PKCS12 keystore
 keytool -list -keystore myStore.p12 -storetype pkcs12 -storepass:file pass
 
 
-# Display contents of a BouncyCastle keystore
+
+
+# Display contents of a BouncyCastle keystore. BouncyCastle provider should be configured before executing this command.
 keytool -list -keystore myStore.bks -storetype bks -storepass:file pass
+
+
 
 
 # Import contents of a jks keystore into a jceks keystore
 keytool -importkeystore -srckeystore myStore.jks -srcstorepass:file pass -destkeystore myStore.jceks -deststoretype jceks -deststorepass:file pass
 
 
+
+
 # Import contents of a jceks keystore into a PKCS12 keystore
 keytool -importkeystore -srckeystore myStore.jceks -srcstoretype jceks -srcstorepass:file pass -destkeystore myStore.p12 -deststoretype pkcs12 -deststorepass:file pass
+
+
 
 
 # Import contents of a PKCS12 keystore into BouncyCastle  keystore
 keytool -importkeystore -srckeystore myStore.p12 -srcstoretype pkcs12 -srcstorepass:file pass -destkeystore myStore.bks -deststoretype BKS -deststorepass:file pass -destprovidername BC
 
 
+
+
 # Import contents of a JCEKS keystore into BouncyCastle keystore
 keytool -importkeystore -srckeystore myStore.jceks -srcstoretype jceks -srcstorepass:file pass -destkeystore myStore.bks -deststoretype bks -deststorepass:file pass
 
 
+
+
 # Import contents of BouncyCastle keystore into DPOD Cloud HSM (Only if you have access to DPOD cloud HSM)
 keytool -importkeystore -srckeystore myStore.bks -srcstoretype bks -srcstorepass:file pass -destkeystore Luna.ks -deststoretype Luna -providerclass com.safenetinc.luna.provider.LunaProvider -providerpath /usr/safenet/lunaclient/jsp/lib/LunaProvider.jar -J-Djava.library.path=/usr/safenet/lunaclient/jsp/lib/
-
